@@ -923,6 +923,7 @@ function AuthScreen({ onAuth }) {
   const [step, setStep] = useState("welcome");
   const [email, setEmail] = useState("");           // only set on submit, not on keypress
   const [emailErr, setEmailErr] = useState("");
+  const [passwordErr, setPasswordErr] = useState("");
   const [loading, setLoading] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -930,8 +931,9 @@ function AuthScreen({ onAuth }) {
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [adminErr, setAdminErr] = useState("");
-  const otpRefs    = useRef([]);
-  const emailRef   = useRef();      // uncontrolled — no re-render while typing
+  const otpRefs          = useRef([]);
+  const emailRef         = useRef();
+  const passwordRef      = useRef();
   const adminEmailRef    = useRef();
   const adminPasswordRef = useRef();
 
@@ -947,10 +949,16 @@ function AuthScreen({ onAuth }) {
   const validateEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(e);
 
   const sendCode = async () => {
-    const val = emailRef.current?.value?.trim() || "";
-    if (!validateEmail(val)) { setEmailErr("Please enter a valid email address"); return; }
-    setEmail(val);                          // store once on submit
-    setEmailErr(""); setLoading(true);
+    const val  = emailRef.current?.value?.trim()    || "";
+    const pass = passwordRef.current?.value?.trim() || "";
+    let hasErr = false;
+    if (!validateEmail(val))  { setEmailErr("Please enter a valid email address"); hasErr = true; }
+    else setEmailErr("");
+    if (pass.length < 6)      { setPasswordErr("Password must be at least 6 characters"); hasErr = true; }
+    else setPasswordErr("");
+    if (hasErr) return;
+    setEmail(val);
+    setLoading(true);
     await new Promise(r => setTimeout(r, 1400));
     const code = String(Math.floor(100000 + Math.random() * 900000));
     setGeneratedCode(code);
@@ -1105,12 +1113,13 @@ function AuthScreen({ onAuth }) {
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}><RealtimeLogo size={36} showText={false} /></div>
         <h2 style={{ fontFamily: "var(--serif)", fontSize: 26, fontWeight: 700, textAlign: "center", marginBottom: 8 }}>Enter your email</h2>
         <p style={{ color: "var(--muted)", fontSize: 13, textAlign: "center", marginBottom: 28, lineHeight: 1.6 }}>We'll send a 6-digit code to verify it's you.</p>
+        {/* Email */}
         <div style={{ position: "relative", marginBottom: 6 }}>
-          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>✉</span>
+          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, pointerEvents: "none" }}>✉</span>
           <input
             ref={emailRef}
             defaultValue=""
-            onKeyDown={e => e.key === "Enter" && sendCode()}
+            onKeyDown={e => e.key === "Enter" && passwordRef.current?.focus()}
             onFocus={e => { setEmailErr(""); e.target.style.borderColor = "var(--gold)"; }}
             onBlur={e => { e.target.style.borderColor = emailErr ? "var(--red)" : "var(--border)"; }}
             placeholder="yourname@email.com"
@@ -1118,8 +1127,25 @@ function AuthScreen({ onAuth }) {
             style={{ width: "100%", padding: "14px 14px 14px 42px", background: "var(--bg)", border: `1px solid ${emailErr ? "var(--red)" : "var(--border)"}`, borderRadius: 8, color: "var(--text)", fontFamily: "var(--mono)", fontSize: 14, outline: "none", transition: "border-color .2s" }}
           />
         </div>
-        {emailErr && <p style={{ color: "var(--red)", fontSize: 12, fontFamily: "var(--mono)", marginBottom: 12 }}>{emailErr}</p>}
-        <button onClick={sendCode} disabled={loading} style={{ width: "100%", padding: "14px", marginTop: emailErr ? 0 : 16, borderRadius: 8, background: "var(--gold)", border: "none", color: "var(--bg)", cursor: "pointer", fontFamily: "var(--mono)", fontWeight: 700, fontSize: 12, letterSpacing: 1.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: loading ? .7 : 1 }}>
+        {emailErr && <p style={{ color: "var(--red)", fontSize: 12, fontFamily: "var(--mono)", marginBottom: 8 }}>{emailErr}</p>}
+
+        {/* Password */}
+        <div style={{ position: "relative", marginBottom: 6, marginTop: emailErr ? 0 : 12 }}>
+          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, pointerEvents: "none" }}>🔒</span>
+          <input
+            ref={passwordRef}
+            defaultValue=""
+            onKeyDown={e => e.key === "Enter" && sendCode()}
+            onFocus={e => { setPasswordErr(""); e.target.style.borderColor = "var(--gold)"; }}
+            onBlur={e => { e.target.style.borderColor = passwordErr ? "var(--red)" : "var(--border)"; }}
+            placeholder="Create a password (min 6 chars)"
+            type="password" autoComplete="new-password"
+            style={{ width: "100%", padding: "14px 14px 14px 42px", background: "var(--bg)", border: `1px solid ${passwordErr ? "var(--red)" : "var(--border)"}`, borderRadius: 8, color: "var(--text)", fontFamily: "var(--mono)", fontSize: 14, outline: "none", transition: "border-color .2s" }}
+          />
+        </div>
+        {passwordErr && <p style={{ color: "var(--red)", fontSize: 12, fontFamily: "var(--mono)", marginBottom: 8 }}>{passwordErr}</p>}
+
+        <button onClick={sendCode} disabled={loading} style={{ width: "100%", padding: "14px", marginTop: 16, borderRadius: 8, background: "var(--gold)", border: "none", color: "var(--bg)", cursor: "pointer", fontFamily: "var(--mono)", fontWeight: 700, fontSize: 12, letterSpacing: 1.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: loading ? .7 : 1 }}>
           {loading ? <><Spinner /> SENDING CODE…</> : "SEND VERIFICATION CODE →"}
         </button>
       </Card>
