@@ -64,94 +64,11 @@ function RealtimeLogo({ size = 36, showText = true }) {
   );
 }
 
-/* ─────────────────────────── SAMPLE DATA ────────────────────────────────── */
-const SAMPLE_POSTS = [
-  {
-    id: 1, author: "Sarah Kimani", handle: "@sarahk", av: "SK", avColor: "#C0392B",
-    type: "image", breaking: true,
-    title: "Heavy floods submerge Ngong Road — vehicles trapped",
-    body: "Flash floods have submerged sections of Ngong Road near Adams Arcade since 4PM. Kenya Red Cross teams deployed. Motorists advised to use alternative routes.",
-    image: "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=700&q=80",
-    location: "Ngong Road, Nairobi", time: "2 min ago",
-    likes: 284, shares: 141, comments: 3, tags: ["flood", "nairobi", "weather"],
-    bio: "Breaking news reporter covering Nairobi South. 6 years in the field.",
-  },
-  {
-    id: 2, author: "James Omondi", handle: "@jomondi", av: "JO", avColor: "#2980B9",
-    type: "article", breaking: true,
-    title: "Protests erupt outside Parliament — hundreds demand cost-of-living action",
-    body: "Demonstrators gathered outside Parliament buildings this afternoon. Police deployed in anti-riot gear. Some tear gas reported along Harambee Avenue.",
-    location: "Parliament Rd, CBD", time: "19 min ago",
-    likes: 512, shares: 318, comments: 5, tags: ["protests", "parliament", "politics"],
-    bio: "Political desk at Realtime News Kenya. Covers Parliament and Statehouse.",
-  },
-  {
-    id: 3, author: "Amina Hassan", handle: "@aminaH", av: "AH", avColor: "#27AE60",
-    type: "video", breaking: true,
-    title: "Fire engulfs Gikomba Market second floor — traders flee",
-    body: "Fire engines from Pumwani and Central stations are responding. Traders are rushing to salvage goods. Cause of the fire is yet to be established.",
-    thumbnail: "https://images.unsplash.com/photo-1587727153052-be85d4e3b12e?w=700&q=80",
-    location: "Gikomba Market, Eastlands", time: "34 min ago",
-    likes: 731, shares: 489, comments: 4, tags: ["fire", "gikomba", "emergency"],
-    bio: "Eastlands correspondent. On the ground in Gikomba, Kamukunji, and Makadara.",
-  },
-  {
-    id: 4, author: "David Mwangi", handle: "@dmwangi", av: "DM", avColor: "#8E44AD",
-    type: "article", breaking: false,
-    title: "SGR Nairobi–Mombasa service delayed 3 hours at Syokimau",
-    body: "Passengers on the 10AM service have been stranded since 11:30AM. Kenya Railways cites a technical fault on the southern line. No compensation offered yet.",
-    location: "SGR Terminus, Syokimau", time: "48 min ago",
-    likes: 143, shares: 89, comments: 2, tags: ["sgr", "transport"],
-    bio: "Transport & infrastructure reporter. Tracks SGR, roads, and matatu sector.",
-  },
-  {
-    id: 5, author: "Grace Wanjiru", handle: "@gracew", av: "GW", avColor: "#D35400",
-    type: "image", breaking: false,
-    title: "8,000 runners take on the Nairobi Half-Marathon",
-    body: "Roads closed along Uhuru Highway and Waiyaki Way until 2PM. Elite runners set a blistering pace through the CBD. Atmosphere electric.",
-    image: "https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?w=700&q=80",
-    location: "Uhuru Highway, Nairobi", time: "1 hr ago",
-    likes: 387, shares: 201, comments: 2, tags: ["marathon", "sports"],
-    bio: "Sports & lifestyle desk. Loves long-distance running coverage.",
-  },
-];
-
-const SAMPLE_COMMENTS = {
-  1: [
-    { id: 101, author: "Peter N.", av: "PN", avColor: "#16A085", text: "Just drove past — water is knee-deep near Prestige Plaza. Avoid completely.", time: "1 min ago" },
-    { id: 102, author: "Lucy W.", av: "LW", avColor: "#8E44AD", text: "KURA should be held accountable. This drainage issue has been flagged 3 times this year.", time: "3 min ago" },
-    { id: 103, author: "Ken O.", av: "KO", avColor: "#E67E22", text: "Route via Lang'ata Road is clear. Use Mbagathi Way as alternative.", time: "5 min ago" },
-  ],
-  2: [
-    { id: 201, author: "Faith M.", av: "FM", avColor: "#C0392B", text: "Fully support this. Unga prices have doubled in 8 months.", time: "10 min ago" },
-    { id: 202, author: "Brian K.", av: "BK", avColor: "#2980B9", text: "Police response seems disproportionate for a peaceful demonstration.", time: "14 min ago" },
-    { id: 203, author: "Aisha O.", av: "AO", avColor: "#27AE60", text: "Any word on whether the CS will address the crowd?", time: "17 min ago" },
-    { id: 204, author: "Njoroge T.", av: "NT", avColor: "#8E44AD", text: "Harambee Avenue is completely blocked. Matatus rerouting through city centre.", time: "18 min ago" },
-    { id: 205, author: "Wambui R.", av: "WR", avColor: "#D35400", text: "Stay safe everyone. This is our right to demonstrate.", time: "19 min ago" },
-  ],
-  3: [
-    { id: 301, author: "Musa A.", av: "MA", avColor: "#16A085", text: "My cousin has a stall there — has he been able to get anything out?", time: "20 min ago" },
-    { id: 302, author: "Rehema J.", av: "RJ", avColor: "#C0392B", text: "Third fire this year at Gikomba. Something needs to change.", time: "25 min ago" },
-    { id: 303, author: "Omar H.", av: "OH", avColor: "#2980B9", text: "Can someone confirm if section B is affected or only section A?", time: "30 min ago" },
-    { id: 304, author: "Amina Hassan", av: "AH", avColor: "#27AE60", text: "UPDATE: Fire now confirmed to be spreading to the ground floor. All traders have evacuated.", time: "32 min ago" },
-  ],
-  4: [
-    { id: 401, author: "Charles M.", av: "CM", avColor: "#E67E22", text: "Kenya Railways needs to compensate affected passengers. This is unacceptable.", time: "40 min ago" },
-    { id: 402, author: "Diana K.", av: "DK", avColor: "#8E44AD", text: "I'm on this train. No announcement, no water, no AC. Very poor handling.", time: "45 min ago" },
-  ],
-  5: [
-    { id: 501, author: "Simon L.", av: "SL", avColor: "#16A085", text: "Incredible atmosphere out there! Best year yet.", time: "50 min ago" },
-    { id: 502, author: "Alice N.", av: "AN", avColor: "#C0392B", text: "Anyone know the lead time at the 10km mark?", time: "55 min ago" },
-  ],
-};
-
-const TICKER = [
-  "🔴 BREAKING: Flash floods on Ngong Road — use alternative routes",
-  "🔴 BREAKING: Fire at Gikomba Market — fire engines on scene",
-  "⚡ Protests outside Parliament — hundreds gathered, police deployed",
-  "📍 SGR delayed 3 hours — Nairobi to Mombasa service affected",
-  "🏃 Nairobi Half-Marathon underway — roads closed Uhuru Highway",
-];
+/* ─────────────────────────── DATA ───────────────────────────────────────── */
+// Feed starts empty — all content comes from real users
+const SAMPLE_POSTS    = [];
+const SAMPLE_COMMENTS = {};
+const TICKER          = ["📡 Welcome to Realtime News Kenya — be the first to report"];
 
 /* ─────────────────────────── ATOMS ──────────────────────────────────────── */
 function Spinner() {
@@ -771,14 +688,17 @@ function NewsApp({ user, onLogout }) {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [composing, setComposing] = useState(false);
-  const [viewers, setViewers] = useState(3842);
+  const [viewers, setViewers] = useState(0);
   const [profilePost, setProfilePost] = useState(null);
   const [adminOpen, setAdminOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
+  // Real visitor counter — hits a free public counter API on every page load
   useEffect(() => {
-    const t = setInterval(() => setViewers(v => v + Math.floor(Math.random() * 5 - 1)), 2500);
-    return () => clearInterval(t);
+    fetch("https://api.counterapi.dev/v1/realtimekenya/visits/up")
+      .then(r => r.json())
+      .then(d => setViewers(d.count ?? 0))
+      .catch(() => setViewers(0));
   }, []);
 
   const addComment = (postId, text) => {
@@ -840,7 +760,7 @@ function NewsApp({ user, onLogout }) {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: "auto" }}>
               <span style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--muted)" }}>
-                <span style={{ color: "var(--blue)" }}>{viewers.toLocaleString()}</span> live
+                <span style={{ color: "var(--blue)" }}>{viewers.toLocaleString()}</span> visits
               </span>
               {user.isAdmin && (
                 <button onClick={() => setAdminOpen(true)} style={{ background: "transparent", border: "1px solid var(--gold)", color: "var(--gold)", cursor: "pointer", fontFamily: "var(--mono)", fontSize: 9, letterSpacing: 2, padding: "5px 12px", borderRadius: 4, fontWeight: 700, transition: "background .15s" }}
