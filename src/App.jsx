@@ -921,7 +921,7 @@ function NewsApp({ user, onLogout }) {
 /* ─────────────────────────── AUTH SCREENS ───────────────────────────────── */
 function AuthScreen({ onAuth }) {
   const [step, setStep] = useState("welcome");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("");           // only set on submit, not on keypress
   const [emailErr, setEmailErr] = useState("");
   const [loading, setLoading] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
@@ -929,10 +929,11 @@ function AuthScreen({ onAuth }) {
   const [otpErr, setOtpErr] = useState("");
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  const [adminEmail, setAdminEmail] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
   const [adminErr, setAdminErr] = useState("");
-  const otpRefs = useRef([]);
+  const otpRefs    = useRef([]);
+  const emailRef   = useRef();      // uncontrolled — no re-render while typing
+  const adminEmailRef    = useRef();
+  const adminPasswordRef = useRef();
 
   useEffect(() => {
     if (step !== "otp") return;
@@ -946,7 +947,9 @@ function AuthScreen({ onAuth }) {
   const validateEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(e);
 
   const sendCode = async () => {
-    if (!validateEmail(email)) { setEmailErr("Please enter a valid email address"); return; }
+    const val = emailRef.current?.value?.trim() || "";
+    if (!validateEmail(val)) { setEmailErr("Please enter a valid email address"); return; }
+    setEmail(val);                          // store once on submit
     setEmailErr(""); setLoading(true);
     await new Promise(r => setTimeout(r, 1400));
     const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -956,7 +959,9 @@ function AuthScreen({ onAuth }) {
   };
 
   const adminLogin = async () => {
-    if (adminEmail !== ADMIN_EMAIL || adminPassword !== ADMIN_PASSWORD) {
+    const ae = adminEmailRef.current?.value?.trim()    || "";
+    const ap = adminPasswordRef.current?.value?.trim() || "";
+    if (ae !== ADMIN_EMAIL || ap !== ADMIN_PASSWORD) {
       setAdminErr("Invalid admin credentials. Please try again."); return;
     }
     setAdminErr(""); setLoading(true);
@@ -964,7 +969,7 @@ function AuthScreen({ onAuth }) {
     setLoading(false);
     setStep("success");
     await new Promise(r => setTimeout(r, 1800));
-    onAuth({ email: adminEmail, isAdmin: true });
+    onAuth({ email: ae, isAdmin: true });
   };
 
   const handleOtpKey = (i, e) => { if (e.key === "Backspace" && !otp[i] && i > 0) otpRefs.current[i - 1]?.focus(); };
@@ -1059,20 +1064,32 @@ function AuthScreen({ onAuth }) {
         <button onClick={() => { setStep("welcome"); setAdminErr(""); }} style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", fontFamily: "var(--mono)", fontSize: 11, marginBottom: 22, padding: 0, letterSpacing: 1 }}>← BACK</button>
         <div style={{ marginBottom: 14 }}>
           <label style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--gold)", letterSpacing: 1.5, display: "block", marginBottom: 7 }}>ADMIN EMAIL</label>
-          <input value={adminEmail} onChange={e => { setAdminEmail(e.target.value); setAdminErr(""); }} onKeyDown={e => e.key === "Enter" && adminLogin()} placeholder="admin@example.com" type="email"
+          <input
+            ref={adminEmailRef}
+            defaultValue=""
+            onKeyDown={e => e.key === "Enter" && adminLogin()}
+            onFocus={e => { setAdminErr(""); e.target.style.borderColor = "var(--gold)"; }}
+            onBlur={e => { e.target.style.borderColor = adminErr ? "var(--red)" : "var(--border)"; }}
+            placeholder="admin@example.com"
+            type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false}
             style={{ width: "100%", padding: "12px 14px", background: "var(--bg)", border: `1px solid ${adminErr ? "var(--red)" : "var(--border)"}`, borderRadius: 8, color: "var(--text)", fontFamily: "var(--mono)", fontSize: 13, outline: "none", transition: "border-color .2s" }}
-            onFocus={e => { if (!adminErr) e.target.style.borderColor = "var(--gold)"; }} onBlur={e => { if (!adminErr) e.target.style.borderColor = "var(--border)"; }}
           />
         </div>
         <div style={{ marginBottom: adminErr ? 10 : 22 }}>
           <label style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--gold)", letterSpacing: 1.5, display: "block", marginBottom: 7 }}>PASSWORD</label>
-          <input value={adminPassword} onChange={e => { setAdminPassword(e.target.value); setAdminErr(""); }} onKeyDown={e => e.key === "Enter" && adminLogin()} placeholder="••••••••••" type="password"
+          <input
+            ref={adminPasswordRef}
+            defaultValue=""
+            onKeyDown={e => e.key === "Enter" && adminLogin()}
+            onFocus={e => { setAdminErr(""); e.target.style.borderColor = "var(--gold)"; }}
+            onBlur={e => { e.target.style.borderColor = adminErr ? "var(--red)" : "var(--border)"; }}
+            placeholder="••••••••••"
+            type="password" autoComplete="current-password"
             style={{ width: "100%", padding: "12px 14px", background: "var(--bg)", border: `1px solid ${adminErr ? "var(--red)" : "var(--border)"}`, borderRadius: 8, color: "var(--text)", fontFamily: "var(--mono)", fontSize: 13, outline: "none", transition: "border-color .2s" }}
-            onFocus={e => { if (!adminErr) e.target.style.borderColor = "var(--gold)"; }} onBlur={e => { if (!adminErr) e.target.style.borderColor = "var(--border)"; }}
           />
         </div>
         {adminErr && <p style={{ color: "var(--red)", fontSize: 12, fontFamily: "var(--mono)", marginBottom: 16 }}>{adminErr}</p>}
-        <button onClick={adminLogin} disabled={loading || !adminEmail || !adminPassword} style={{ width: "100%", padding: "14px", borderRadius: 8, background: adminEmail && adminPassword ? "var(--gold)" : "var(--surface2)", border: "none", color: adminEmail && adminPassword ? "var(--bg)" : "var(--muted2)", cursor: adminEmail && adminPassword ? "pointer" : "not-allowed", fontFamily: "var(--mono)", fontWeight: 700, fontSize: 12, letterSpacing: 1.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "opacity .15s" }}>
+        <button onClick={adminLogin} disabled={loading} style={{ width: "100%", padding: "14px", borderRadius: 8, background: "var(--gold)", border: "none", color: "var(--bg)", cursor: "pointer", fontFamily: "var(--mono)", fontWeight: 700, fontSize: 12, letterSpacing: 1.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: loading ? .7 : 1 }}>
           {loading ? <><Spinner /> AUTHENTICATING…</> : "ACCESS ADMIN PANEL →"}
         </button>
       </Card>
@@ -1090,13 +1107,19 @@ function AuthScreen({ onAuth }) {
         <p style={{ color: "var(--muted)", fontSize: 13, textAlign: "center", marginBottom: 28, lineHeight: 1.6 }}>We'll send a 6-digit code to verify it's you.</p>
         <div style={{ position: "relative", marginBottom: 6 }}>
           <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>✉</span>
-          <input value={email} onChange={e => { setEmail(e.target.value); setEmailErr(""); }} onKeyDown={e => e.key === "Enter" && sendCode()} placeholder="yourname@email.com" type="email"
+          <input
+            ref={emailRef}
+            defaultValue=""
+            onKeyDown={e => e.key === "Enter" && sendCode()}
+            onFocus={e => { setEmailErr(""); e.target.style.borderColor = "var(--gold)"; }}
+            onBlur={e => { e.target.style.borderColor = emailErr ? "var(--red)" : "var(--border)"; }}
+            placeholder="yourname@email.com"
+            type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false}
             style={{ width: "100%", padding: "14px 14px 14px 42px", background: "var(--bg)", border: `1px solid ${emailErr ? "var(--red)" : "var(--border)"}`, borderRadius: 8, color: "var(--text)", fontFamily: "var(--mono)", fontSize: 14, outline: "none", transition: "border-color .2s" }}
-            onFocus={e => { if (!emailErr) e.target.style.borderColor = "var(--gold)"; }} onBlur={e => { if (!emailErr) e.target.style.borderColor = "var(--border)"; }}
           />
         </div>
         {emailErr && <p style={{ color: "var(--red)", fontSize: 12, fontFamily: "var(--mono)", marginBottom: 12 }}>{emailErr}</p>}
-        <button onClick={sendCode} disabled={loading || !email} style={{ width: "100%", padding: "14px", marginTop: emailErr ? 0 : 16, borderRadius: 8, background: email ? "var(--gold)" : "var(--surface2)", border: "none", color: email ? "var(--bg)" : "var(--muted2)", cursor: email ? "pointer" : "not-allowed", fontFamily: "var(--mono)", fontWeight: 700, fontSize: 12, letterSpacing: 1.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+        <button onClick={sendCode} disabled={loading} style={{ width: "100%", padding: "14px", marginTop: emailErr ? 0 : 16, borderRadius: 8, background: "var(--gold)", border: "none", color: "var(--bg)", cursor: "pointer", fontFamily: "var(--mono)", fontWeight: 700, fontSize: 12, letterSpacing: 1.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: loading ? .7 : 1 }}>
           {loading ? <><Spinner /> SENDING CODE…</> : "SEND VERIFICATION CODE →"}
         </button>
       </Card>
