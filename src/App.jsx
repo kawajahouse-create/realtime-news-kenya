@@ -1130,7 +1130,23 @@ function AuthScreen({ onAuth }) {
 
 /* ─────────────────────────── ROOT ───────────────────────────────────────── */
 export default function App() {
-  const [user, setUser] = useState(null);
-  if (!user) return <AuthScreen onAuth={setUser} />;
-  return <NewsApp user={user} onLogout={() => setUser(null)} />;
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem("rnk_user");
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  });
+
+  const handleAuth = (u) => {
+    try { localStorage.setItem("rnk_user", JSON.stringify(u)); } catch {}
+    setUser(u);
+  };
+
+  const handleLogout = () => {
+    try { localStorage.removeItem("rnk_user"); } catch {}
+    setUser(null);
+  };
+
+  if (!user) return <AuthScreen onAuth={handleAuth} />;
+  return <NewsApp user={user} onLogout={handleLogout} />;
 }
