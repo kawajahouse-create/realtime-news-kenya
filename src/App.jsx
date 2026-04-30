@@ -5,18 +5,18 @@ const GLOBAL_CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#08090D;
-  --surface:#10121A;
-  --surface2:#161924;
-  --border:#1E2230;
-  --gold:#F0A500;
-  --gold-dim:rgba(240,165,0,0.12);
+  --bg:#E8EDF4;
+  --surface:#FFFFFF;
+  --surface2:#F2F5F9;
+  --border:#CDD5E0;
+  --gold:#1A5FD4;
+  --gold-dim:rgba(26,95,212,0.10);
   --red:#E63946;
-  --blue:#4A90E2;
-  --green:#34D399;
-  --text:#F0EDE8;
-  --muted:#6B7280;
-  --muted2:#3A3F50;
+  --blue:#0EA5E9;
+  --green:#10B981;
+  --text:#0D1320;
+  --muted:#4B5563;
+  --muted2:#9CA3AF;
   --serif:'Fraunces',Georgia,serif;
   --sans:'DM Sans',sans-serif;
   --mono:'DM Mono',monospace;
@@ -24,7 +24,7 @@ const GLOBAL_CSS = `
 body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+::-webkit-scrollbar-thumb{background:var(--muted2);border-radius:2px}
 input,textarea,button{font-family:var(--sans)}
 input::placeholder,textarea::placeholder{color:var(--muted2)}
 
@@ -96,12 +96,12 @@ function TypeBadge({ type }) {
   );
 }
 
-function Avatar({ av, avColor, size = 38, onClick }) {
+function Avatar({ av, avColor, size = 38, onClick, src }) {
   return (
-    <div onClick={onClick} style={{ width: size, height: size, borderRadius: "50%", background: avColor, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mono)", fontWeight: 500, fontSize: size * 0.32, color: "#fff", flexShrink: 0, cursor: onClick ? "pointer" : "default", transition: "opacity .15s" }}
+    <div onClick={onClick} style={{ width: size, height: size, borderRadius: "50%", background: src ? "transparent" : avColor, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mono)", fontWeight: 500, fontSize: size * 0.32, color: "#fff", flexShrink: 0, cursor: onClick ? "pointer" : "default", transition: "opacity .15s", overflow: "hidden" }}
       onMouseEnter={e => { if (onClick) e.currentTarget.style.opacity = ".8"; }}
       onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
-    >{av}</div>
+    >{src ? <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : av}</div>
   );
 }
 
@@ -357,6 +357,7 @@ function ComposeModal({ user, onClose, onPost }) {
   const [body, setBody] = useState("");
   const [location, setLocation] = useState("");
   const [type, setType] = useState("article");
+  const [isBreaking, setIsBreaking] = useState(false);
   const [preview, setPreview] = useState(null);
   const fileRef = useRef();
 
@@ -378,7 +379,7 @@ function ComposeModal({ user, onClose, onPost }) {
     const av = user.email.slice(0, 2).toUpperCase();
     onPost({
       id: Date.now(), author: user.email.split("@")[0], handle: `@${user.email.split("@")[0]}`,
-      av, avColor: "var(--gold)", type, breaking: false,
+      av, avColor: "var(--gold)", type, breaking: isBreaking,
       title, body, location: location || "Unknown location",
       time: "just now", likes: 0, shares: 0, comments: 0, tags: [], bio: "Community reporter.",
       ...(preview && type === "image" ? { image: preview } : {}),
@@ -399,10 +400,15 @@ function ComposeModal({ user, onClose, onPost }) {
           <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", fontSize: 20 }}>✕</button>
         </div>
         <div style={{ padding: "22px" }}>
-          <div style={{ display: "flex", gap: 6, marginBottom: 18 }}>
+          <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
             {[["article", "✦ Article"], ["image", "◉ Photo"], ["video", "▶ Video"]].map(([v, l]) => (
-              <button key={v} onClick={() => setType(v)} style={{ flex: 1, padding: "9px 0", borderRadius: 5, background: type === v ? "var(--gold)" : "var(--surface2)", border: `1px solid ${type === v ? "var(--gold)" : "var(--border)"}`, color: type === v ? "var(--bg)" : "var(--muted)", cursor: "pointer", fontFamily: "var(--mono)", fontSize: 10, letterSpacing: 1, fontWeight: type === v ? 600 : 400 }}>{l}</button>
+              <button key={v} onClick={() => setType(v)} style={{ flex: 1, padding: "9px 0", borderRadius: 5, background: type === v ? "var(--gold)" : "var(--surface2)", border: `1px solid ${type === v ? "var(--gold)" : "var(--border)"}`, color: type === v ? "#fff" : "var(--muted)", cursor: "pointer", fontFamily: "var(--mono)", fontSize: 10, letterSpacing: 1, fontWeight: type === v ? 600 : 400 }}>{l}</button>
             ))}
+          </div>
+          <div style={{ display: "flex", gap: 6, marginBottom: 18 }}>
+            <button onClick={() => setIsBreaking(v => !v)} style={{ flex: 1, padding: "8px 0", borderRadius: 5, background: isBreaking ? "rgba(230,57,70,.12)" : "var(--surface2)", border: `1px solid ${isBreaking ? "var(--red)" : "var(--border)"}`, color: isBreaking ? "var(--red)" : "var(--muted)", cursor: "pointer", fontFamily: "var(--mono)", fontSize: 10, letterSpacing: 1, fontWeight: isBreaking ? 700 : 400, transition: "all .15s" }}>
+              🔴 {isBreaking ? "BREAKING ✓" : "MARK AS BREAKING"}
+            </button>
           </div>
           <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Headline — what is happening right now?"
             style={{ width: "100%", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 6, padding: "13px 15px", color: "var(--text)", fontFamily: "var(--serif)", fontSize: 18, fontWeight: 700, outline: "none", marginBottom: 12, transition: "border-color .2s" }}
@@ -431,7 +437,7 @@ function ComposeModal({ user, onClose, onPost }) {
             />
             <button onClick={gps} style={{ background: "var(--surface2)", border: "1px solid var(--border)", color: "var(--blue)", cursor: "pointer", fontFamily: "var(--mono)", fontSize: 10, padding: "0 16px", borderRadius: 6, letterSpacing: 1, whiteSpace: "nowrap" }}>USE GPS</button>
           </div>
-          <button onClick={publish} disabled={!title.trim()} style={{ width: "100%", padding: "14px", borderRadius: 6, cursor: title.trim() ? "pointer" : "not-allowed", background: title.trim() ? "var(--gold)" : "var(--surface2)", border: "none", color: title.trim() ? "var(--bg)" : "var(--muted2)", fontFamily: "var(--mono)", fontSize: 12, letterSpacing: 2, fontWeight: 700, transition: "all .2s" }}>PUBLISH TO FEED →</button>
+          <button onClick={publish} disabled={!title.trim()} style={{ width: "100%", padding: "14px", borderRadius: 6, cursor: title.trim() ? "pointer" : "not-allowed", background: title.trim() ? "var(--gold)" : "var(--surface2)", border: "none", color: title.trim() ? "#fff" : "var(--muted2)", fontFamily: "var(--mono)", fontSize: 12, letterSpacing: 2, fontWeight: 700, transition: "all .2s" }}>PUBLISH TO FEED →</button>
         </div>
       </div>
     </div>
@@ -482,7 +488,7 @@ function AdminPanel({ posts, comments, viewers, onClose, onDeletePost, onDeleteC
     <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", overflowY: "auto", animation: "fadeIn .2s ease" }}>
 
       {/* Admin header */}
-      <div style={{ position: "sticky", top: 0, zIndex: 10, background: "linear-gradient(to right,#0D0500,var(--surface))", borderBottom: "1px solid rgba(240,165,0,.25)", display: "flex", alignItems: "center", padding: "14px 24px", gap: 16 }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 10, background: "linear-gradient(to right,#071535,var(--surface))", borderBottom: "1px solid rgba(240,165,0,.25)", display: "flex", alignItems: "center", padding: "14px 24px", gap: 16 }}>
         <RealtimeLogo size={26} />
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--gold)", letterSpacing: 3 }}>ADMIN PANEL</div>
@@ -683,8 +689,12 @@ function AdminPanel({ posts, comments, viewers, onClose, onDeletePost, onDeleteC
 
 /* ─────────────────────────── MAIN APP ───────────────────────────────────── */
 function NewsApp({ user, onLogout }) {
-  const [posts, setPosts] = useState(SAMPLE_POSTS);
-  const [comments, setComments] = useState(SAMPLE_COMMENTS);
+  const [posts, setPosts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("rnk_posts") || "[]"); } catch { return []; }
+  });
+  const [comments, setComments] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("rnk_comments") || "{}"); } catch { return {}; }
+  });
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [composing, setComposing] = useState(false);
@@ -692,6 +702,38 @@ function NewsApp({ user, onLogout }) {
   const [profilePost, setProfilePost] = useState(null);
   const [adminOpen, setAdminOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [profilePic, setProfilePic] = useState(() => {
+    try { return localStorage.getItem("rnk_pic_" + user.email) || null; } catch { return null; }
+  });
+  const picRef = useRef();
+
+  const handlePicUpload = e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      const data = ev.target.result;
+      setProfilePic(data);
+      try { localStorage.setItem("rnk_pic_" + user.email, data); } catch {}
+    };
+    r.readAsDataURL(f);
+  };
+
+  // Close user menu on outside click
+  useEffect(() => {
+    if (!showUserMenu) return;
+    const close = () => setShowUserMenu(false);
+    setTimeout(() => document.addEventListener("click", close), 0);
+    return () => document.removeEventListener("click", close);
+  }, [showUserMenu]);
+
+  // Persist posts and comments to localStorage whenever they change
+  useEffect(() => {
+    try { localStorage.setItem("rnk_posts", JSON.stringify(posts)); } catch {}
+  }, [posts]);
+  useEffect(() => {
+    try { localStorage.setItem("rnk_comments", JSON.stringify(comments)); } catch {}
+  }, [comments]);
 
   // Real visitor counter — hits a free public counter API on every page load
   useEffect(() => {
@@ -768,10 +810,26 @@ function NewsApp({ user, onLogout }) {
                   onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
                 >⚙ ADMIN</button>
               )}
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mono)", fontWeight: 700, fontSize: 12, color: "var(--bg)", cursor: "pointer" }} title={user.email} onClick={onLogout}>
-                {user.email.slice(0, 2).toUpperCase()}
+              <div style={{ position: "relative" }}>
+                <input ref={picRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePicUpload} />
+                <div style={{ width: 34, height: 34, borderRadius: "50%", background: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mono)", fontWeight: 700, fontSize: 12, color: "#fff", cursor: "pointer", overflow: "hidden", border: "2px solid var(--gold)" }} title={user.email} onClick={() => setShowUserMenu(v => !v)}>
+                  {profilePic ? <img src={profilePic} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : user.email.slice(0, 2).toUpperCase()}
+                </div>
+                {showUserMenu && (
+                  <div style={{ position: "absolute", top: 40, right: 0, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,.15)", zIndex: 200, minWidth: 180, overflow: "hidden", animation: "slideDown .15s ease" }}>
+                    <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--border)", fontFamily: "var(--mono)", fontSize: 10, color: "var(--muted)", letterSpacing: 1 }}>{user.email}</div>
+                    <button onClick={() => { setShowUserMenu(false); picRef.current.click(); }} style={{ width: "100%", textAlign: "left", padding: "10px 14px", background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "var(--text)", display: "flex", alignItems: "center", gap: 8 }}
+                      onMouseEnter={e => { e.currentTarget.style.background = "var(--surface2)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "none"; }}
+                    >📷 Change Profile Photo</button>
+                    <button onClick={() => { setShowUserMenu(false); onLogout(); }} style={{ width: "100%", textAlign: "left", padding: "10px 14px", background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "var(--red)", display: "flex", alignItems: "center", gap: 8 }}
+                      onMouseEnter={e => { e.currentTarget.style.background = "var(--surface2)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "none"; }}
+                    >→ Logout</button>
+                  </div>
+                )}
               </div>
-              <button onClick={() => setComposing(true)} style={{ background: "var(--gold)", border: "none", color: "var(--bg)", cursor: "pointer", fontFamily: "var(--mono)", fontSize: 11, letterSpacing: 1.5, padding: "8px 18px", borderRadius: 5, fontWeight: 700, transition: "opacity .15s" }}
+              <button onClick={() => setComposing(true)} style={{ background: "var(--gold)", border: "none", color: "#fff", cursor: "pointer", fontFamily: "var(--mono)", fontSize: 11, letterSpacing: 1.5, padding: "8px 18px", borderRadius: 5, fontWeight: 700, transition: "opacity .15s" }}
                 onMouseEnter={e => { e.currentTarget.style.opacity = ".85"; }}
                 onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
               >+ POST</button>
@@ -818,10 +876,10 @@ function NewsApp({ user, onLogout }) {
         </div>
 
         {/* FAB */}
-        <button onClick={() => setComposing(true)} style={{ position: "fixed", bottom: 26, right: 26, width: 54, height: 54, borderRadius: "50%", background: "var(--gold)", border: "none", color: "var(--bg)", fontSize: 24, cursor: "pointer", boxShadow: "0 4px 24px rgba(240,165,0,.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 90, transition: "transform .2s, box-shadow .2s" }}
-          onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.1)"; e.currentTarget.style.boxShadow = "0 6px 32px rgba(240,165,0,.55)"; }}
+        <button onClick={() => setComposing(true)} style={{ position: "fixed", bottom: 26, right: 26, width: 54, height: 54, borderRadius: "50%", background: "var(--gold)", border: "none", color: "var(--bg)", fontSize: 24, cursor: "pointer", boxShadow: "0 4px 24px rgba(26,95,212,.35)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 90, transition: "transform .2s, box-shadow .2s" }}
+          onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.1)"; e.currentTarget.style.boxShadow = "0 6px 32px rgba(26,95,212,.5)"; }}
           onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(240,165,0,.4)"; }}
-        >+</button>
+        >✎</button>
 
         {composing   && <ComposeModal user={user} onClose={() => setComposing(false)} onPost={addPost} />}
         {profilePost && <ProfileModal post={profilePost} allPosts={posts} onClose={() => setProfilePost(null)} onTagSearch={handleTagSearch} />}
@@ -932,8 +990,8 @@ function AuthScreen({ onAuth }) {
 
   const BgDecor = () => (
     <div style={{ position: "fixed", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
-      <div style={{ position: "absolute", top: -160, right: -160, width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(240,165,0,.08) 0%, transparent 70%)" }} />
-      <div style={{ position: "absolute", bottom: -200, left: -100, width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(240,165,0,.05) 0%, transparent 70%)" }} />
+      <div style={{ position: "absolute", top: -160, right: -160, width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(26,95,212,.08) 0%, transparent 70%)" }} />
+      <div style={{ position: "absolute", bottom: -200, left: -100, width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(26,95,212,.05) 0%, transparent 70%)" }} />
       <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: .04 }}>
         <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--gold)" strokeWidth="0.5" /></pattern></defs>
         <rect width="100%" height="100%" fill="url(#grid)" />
@@ -984,7 +1042,7 @@ function AuthScreen({ onAuth }) {
       <style>{GLOBAL_CSS}</style><BgDecor />
       <Card>
         {/* Dark gold header accent */}
-        <div style={{ background: "linear-gradient(135deg,#1a0800,var(--surface2))", margin: "-40px -36px 28px", padding: "22px 36px", borderBottom: "1px solid rgba(240,165,0,.2)", borderRadius: "12px 12px 0 0" }}>
+        <div style={{ background: "linear-gradient(135deg,#071535,var(--surface2))", margin: "-40px -36px 28px", padding: "22px 36px", borderBottom: "1px solid rgba(240,165,0,.2)", borderRadius: "12px 12px 0 0" }}>
           <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--gold)", letterSpacing: 3, marginBottom: 6 }}>SECURE ADMIN ACCESS</div>
           <div style={{ fontFamily: "var(--serif)", fontSize: 22, fontWeight: 900, color: "var(--text)" }}>Admin Portal</div>
           <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--muted)", marginTop: 3, letterSpacing: 1 }}>REALTIME NEWS KENYA</div>
@@ -1115,7 +1173,7 @@ function AuthScreen({ onAuth }) {
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
       <style>{GLOBAL_CSS}</style>
       <div style={{ textAlign: "center", animation: "scaleIn .4s ease" }}>
-        <div style={{ width: 80, height: 80, borderRadius: "50%", background: "var(--gold)", margin: "0 auto 20px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 20px rgba(240,165,0,.1)" }}>
+        <div style={{ width: 80, height: 80, borderRadius: "50%", background: "var(--gold)", margin: "0 auto 20px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 20px rgba(26,95,212,.12)" }}>
           <svg width="36" height="36" viewBox="0 0 40 40">
             <polyline points="8,20 17,30 32,12" fill="none" stroke="var(--bg)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" style={{ strokeDasharray: 40, strokeDashoffset: 0, animation: "checkIn .5s ease .1s both" }} />
           </svg>
